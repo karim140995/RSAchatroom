@@ -1,0 +1,73 @@
+<html>
+
+<head>
+	<style>
+		body {
+		  color : green;
+	          background-color : black;
+		}
+		h1{
+		   width : 500px;
+		   margin: 0 auto;
+		   margin-bottom : 50px;
+		}
+		.auth{
+		   margin : auto;
+		   width : 500px;		
+		}
+	</style>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+
+<body>
+		<div id ="main" style="padding-right:200px;">
+			<div class="auth">	
+			<form id="f" name ="f" action="#" method="POST">
+				 <div class="form-group row">
+				    <div class="col-md-12">
+				      <label for="username" class="col-sm-2 col-form-label">Public key :</label>
+				      <textarea rows ="10" required name="crt" class="form-control-plaintext" id="pub" placeholder="Public key"></textarea>
+				    </div>
+				    <div class="col-md-12">
+				      <label for="pk" class="col-sm-2 col-form-label">Private Key:</label>
+				      <textarea rows="10" required name="crt" class="form-control-plaintext" id="pk" placeholder="Provide a private key"></textarea>
+				    </div>
+				  </div>
+				<div>  
+				 <input class="btn btn-success" type="button" onclick="test()" value="test">
+			        </div> 
+			</form>
+			</div>
+		</div>
+</body>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-		wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+<script>
+function test(){
+	   pub = document.getElementById("pub").value;
+           pk  = document.getElementById("pk").value;
+	   message = "tralalilalala"	
+	   // Encrypt with the public key...
+           var encrypt = new JSEncrypt();
+           encrypt.setPublicKey(pub);
+           var encrypted = encrypt.encrypt(message);
+	   
+	   encrypted = "oPsexBrG17FPPttAxnj+ZoehbOpTmA8XzW3zCTdGdJqLt5CpLwB+YEmxcK6yVZOawW3CWd8VGbCwgjVGZQ19zayOd38szRLGEDOh0Gh/jr5uFAuGyK5J9s3O+cELMytLhnh6l0m9aS/ibo3g5gma2HunpeHlWtfTWlPwROv0+Ps0CIOAUrWzwgPgrAPVzgSCYRUkz4J4CopdKt3FZZnFV2iPQLHeVnd87pplLtmQikBVRj9+/r4YqHoVi86jtSL8Cnfyi3VksNSBPgjdT6Av/DFgqhGvcnXcYVMEGvObpBKVaW0Z00935FZbPAWqrAeyyU0jfKpYaENRF7jlxVqZVQ==";
+           var decrypt = new JSEncrypt();
+           decrypt.setPrivateKey(pk);
+           var uncrypted = decrypt.decrypt(encrypted);
+           alert(uncrypted);
+	
+           // Now a simple check to see if the round-trip worked.
+           if (uncrypted == message) {
+             alert('It works!!!');
+           }
+           else {
+             alert('Something went wrong....');
+           }
+	
+}
+</script>
+
+<script src="js/jsencrypt/bin/jsencrypt.min.js"></script>
+</html>

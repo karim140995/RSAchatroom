@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Secure Chat Lobby</title>
+
+	<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+	<style>
+		body {
+		  color : green;
+	          background-color : black;
+		}
+		h1{
+		   width : 500px;
+		   margin: 0 auto;
+		   margin-bottom : 50px;
+		}
+		.auth{
+		   margin : auto;
+		   width : 500px;		
+		}
+	</style>
+    </head>
+    <body class="matrix">
+	<div>
+		<h1>Welcome to Secure Chat</h1>
+		<div class="row" id="send">
+			<div class="col-md-12">
+				<ul style='list-style-type:none;' id='chatbox'></ul>
+			</div>	
+		
+			<div class="col-md-12" style="margin-left : 50px;">
+				<input type='text'  name='send' id="message">
+				<select id="to" name="to">
+					<option value="system">System</option>
+				</select>
+				<input type='button' onclick='send()' value="Send">
+			</div> 
+			<div class="col-md-12" hidden>
+				      <label for="pk" class="col-sm-2 col-form-label">Private Key:</label>
+				      <textarea rows="10" required name="crt" class="form-control-plaintext" id="pk" placeholder="Provide a private key"></textarea>
+				    </div>
+			</div>
+		</div>
+	</div>
+    </body>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-		wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+<script src="js/jsencrypt/bin/jsencrypt.min.js"></script>
+    <script>
+	  const ws = new WebSocket("ws://127.0.0.1:8080/");
+	  var cn = localStorage.getItem("cn");
+	  var crt = localStorage.getItem("crt");
+	  var pk = localStorage.getItem("pk");
+	  var list_users = [];
+          var chatbox = []; 
+	
+	  console.log(pk);
+	  //Getting the list of existing users
+          $.get("http://127.0.0.1:5000/user",function(result){
+		list_users = result;
+		console.log(result);
+		for(i=0;i<list_users.length;i++){
+			to = document.getElementById("to");
+			option = document.createElement("option");
+			option.text = list_users[i].cn;
+			to.add(option);
+		}
+	   })
+	 .fail(function() {
+	    	alert("Could not load user list");
+	  });		
+         
+
+
+
+	  function send() {
+              messageTxt = document.getElementById("message").value;
+
+	      list = document.getElementById("chatbox")
+	      node = document.createElement("LI")
+	      line = document.createTextNode("> You : "+ messageTxt);
+	      node.appendChild(line);
+	      list.appendChild(node);
+	
+	      to = document.getElementById("to");
+	      to = to.options[to.selectedIndex].value;
+	      message = {
+	        "message" : "",
+		"to"      : to
+	      }
+	      for (i = 0 ;i< list_users.length ; i++ ){
+	      	if(list_users[i].cn == to){
+          	     encrypt = new JSEncrypt();
+		     encrypt.setPublicKey(list_users[i].pubkey);
+		     encrypted = encrypt.encrypt(messageTxt);
+		     message.message = encrypted;
+		     ws.send(JSON.stringify(message));
+		} 
+	      } 
+	  }
+
+	  //Send cn
+	  ws.onopen = function(event){
+		ws.send(cn);
+	  }
+	  //Append new messages
+	  ws.onmessage = function (event) {
+		list = document.getElementById("chatbox")
+		node = document.createElement("LI")
+		message = JSON.parse(event.data);
+		text = message.message;
+                if(message.from != "System") {
+			pkform = document.getElementById("pk").value;
+ 	  		decrypt = new JSEncrypt();
+			decrypt.setPrivateKey(pk);
+		 	decrypted = decrypt.decrypt(text);
+			text=decrypted;
+		}
+		line = document.createTextNode("> "+ message.from + " : "+text);
+		node.appendChild(line);
+		list.appendChild(node);
+	    }
+	  //Display error
+	  ws.onerror = function(error) {
+		alert(error.data);
+	  }
+
+    </script>
+</html>
